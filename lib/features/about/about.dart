@@ -4,7 +4,8 @@ import 'package:protfolio/features/home/widgets.dart';
 import 'package:protfolio/shared/extension.dart';
 
 class About extends StatefulWidget {
-  const About({super.key});
+  const About({super.key, required this.aboutrighcontroller});
+  final ScrollController aboutrighcontroller;
 
   @override
   State<About> createState() => _AboutState();
@@ -16,6 +17,7 @@ class _AboutState extends State<About> {
     return Scaffold(
       body: Row(
         children: [
+          // left content
           Container(
             width: context.screenWidth * 0.6,
             padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 40),
@@ -78,7 +80,9 @@ class _AboutState extends State<About> {
           // right Section
           Expanded(
             child: SingleChildScrollView(
+              controller: widget.aboutrighcontroller,
               padding: EdgeInsets.symmetric(vertical: 30),
+              physics: ClampingScrollPhysics(),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,6 +91,7 @@ class _AboutState extends State<About> {
                   Align(
                     alignment: AlignmentGeometry.centerLeft,
                     child: SkillCards(
+                      isSvg: true,
                       iconAddress: 'assets/image/pulse.svg',
                       discription:
                           'Develop interactive, high-fidelity prototypes in Figma to validate product ideas before development and reduce implementation risks.',
@@ -96,6 +101,7 @@ class _AboutState extends State<About> {
                   Align(
                     alignment: AlignmentGeometry.centerRight,
                     child: SkillCards(
+                      isSvg: true,
                       iconAddress: 'assets/image/school.svg',
                       title: 'Publishing',
                       discription:
@@ -105,7 +111,8 @@ class _AboutState extends State<About> {
                   Align(
                     alignment: AlignmentGeometry.centerLeft,
                     child: SkillCards(
-                      iconAddress: 'assets/image/diamond.svg',
+                      isSvg: true,
+                      iconAddress: 'assets/image/optimize.svg',
                       title: 'Optimization',
                       discription:
                           'Optimize performance, reduce load time, and handle full deployment to Play Store, App Store, and Web.',
@@ -114,28 +121,41 @@ class _AboutState extends State<About> {
                   Align(
                     alignment: AlignmentGeometry.centerRight,
                     child: SkillCards(
-                      iconAddress: 'assets/image/school.svg',
-                      title: 'Publishing',
+                      isSvg: true,
+                      iconAddress: 'assets/image/cross_platform.svg',
+                      title: 'Cross-Platform Development',
                       discription:
-                          'Deploy applications to Google Play Store, Apple App Store, and web hosting platforms with proper CI/CD setup.',
+                          'Build apps that work seamlessly on iOS, Android, Web, and Desktop from a single codebase, reducing development time and cost.',
                     ),
                   ),
                   Align(
                     alignment: AlignmentGeometry.centerLeft,
                     child: SkillCards(
-                      iconAddress: 'assets/image/diamond.svg',
-                      title: 'Optimization',
+                      isSvg: false,
+                      iconAddress: 'assets/lottie/diamond.svg',
+                      title: 'Animations & Motion Design  ',
                       discription:
-                          'Optimize performance, reduce load time, and handle full deployment to Play Store, App Store, and Web.',
+                          'Create smooth, engaging animations, custom widgets and reusable UI components with animation framework to improve user experience and make apps feel dynamic and polished.',
                     ),
                   ),
                   Align(
                     alignment: AlignmentGeometry.centerRight,
                     child: SkillCards(
-                      iconAddress: 'assets/image/school.svg',
-                      title: 'Publishing',
+                      isSvg: true,
+                      iconAddress: 'assets/image/diamond.svg',
+                      title: 'Testing & Quality Assurance',
                       discription:
-                          'Deploy applications to Google Play Store, Apple App Store, and web hosting platforms with proper CI/CD setup.',
+                          'Implement unit tests, widget tests, and integration tests to ensure the app is reliable and performs as expected before deployment.',
+                    ),
+                  ),
+                  Align(
+                    alignment: AlignmentGeometry.centerLeft,
+                    child: SkillCards(
+                      isSvg: true,
+                      iconAddress: 'assets/image/offline.svg',
+                      title: 'Offline Functionality',
+                      discription:
+                          'Enable apps to work seamlessly without an internet connection by caching data locally and syncing automatically when online, ensuring uninterrupted user experience.',
                     ),
                   ),
                 ],

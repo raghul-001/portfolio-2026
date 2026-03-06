@@ -3,109 +3,105 @@ import 'package:flutter/material.dart';
 import 'package:protfolio/features/about/about.dart';
 import 'package:protfolio/features/contact/contact.dart';
 import 'package:protfolio/features/home/home_page.dart';
+import 'package:protfolio/shared/extension.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
-class Dastboard extends StatefulWidget {
-  const Dastboard({super.key});
+class Dashboard extends StatefulWidget {
+  const Dashboard({super.key});
 
   @override
-  State<Dastboard> createState() => _DastboardState();
+  State<Dashboard> createState() => _DashboardState();
 }
 
-class _DastboardState extends State<Dastboard> {
-  final ScrollController _mainController = ScrollController();
-  final ScrollController _aboutRightController = ScrollController();
+class _DashboardState extends State<Dashboard> {
+  final ScrollController _mainScrollController = ScrollController();
+  final ScrollController _aboutScrollController = ScrollController();
+  bool isAboutSectionVisible = false;
+  double _lastOffset = 0.0;
+  String scrollDirection = 'forward';
+
+  @override
+  void initState() {
+    super.initState();
+
+    _mainScrollController.addListener(() {
+      final offset = _mainScrollController.offset;
+      final delta = offset - _lastOffset;
+
+      if (delta > 0) {
+        scrollDirection = 'forward';
+      } else if (delta < 0) {
+        scrollDirection = 'backward';
+      }
+
+      if (isAboutSectionVisible) {
+        final aboutOffset = _aboutScrollController.offset;
+        final maxExtent = _aboutScrollController.position.maxScrollExtent;
+        final minExtent = _aboutScrollController.position.minScrollExtent;
+
+        /// FORWARD SCROLL
+        if (delta > 0 && aboutOffset < maxExtent) {
+          _mainScrollController.jumpTo(_lastOffset);
+
+          final newOffset = (aboutOffset + delta).clamp(minExtent, maxExtent);
+
+          _aboutScrollController.jumpTo(newOffset);
+          return;
+        }
+
+        /// BACKWARD SCROLL
+        if (delta < 0 && aboutOffset > minExtent) {
+          _mainScrollController.jumpTo(_lastOffset);
+
+          final newOffset = (aboutOffset + delta).clamp(minExtent, maxExtent);
+
+          _aboutScrollController.jumpTo(newOffset);
+          return;
+        }
+      }
+
+      _lastOffset = offset;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final vh = MediaQuery.of(context).size.height;
     return Scaffold(
-      body: Listener(
-        onPointerSignal: (event) {
-          if (event is PointerScrollEvent) {
-            if (!_mainController.hasClients) return;
-            final dy = event.scrollDelta.dy;
-            final aboutStart = vh;
-            final aboutEnd = vh * 2;
-            final current = _mainController.offset;
-            final maxMain = _mainController.position.maxScrollExtent;
-            final goingDown = dy > 0;
-
-            double clamp(double v, double min, double max) {
-              if (v < min) return min;
-              if (v > max) return max;
-              return v;
-            }
-
-            void scrollMain(double target) {
-              final t = clamp(target, 0, maxMain);
-              _mainController.jumpTo(t);
-            }
-
-            bool rightReady = _aboutRightController.hasClients;
-            final rightMax = rightReady
-                ? _aboutRightController.position.maxScrollExtent
-                : 0.0;
-            void scrollRight(double target) {
-              if (!rightReady) return;
-              final t = clamp(target, 0, rightMax);
-              _aboutRightController.jumpTo(t);
-            }
-
-            if (goingDown) {
-              final newMain = current + dy;
-              if (current < aboutStart && newMain >= aboutStart) {
-                scrollMain(aboutStart);
-                if (rightReady) {
-                  scrollRight(_aboutRightController.offset + dy);
-                }
-                return;
-              }
-              if (current >= aboutStart && current < aboutEnd) {
-                if (rightReady && _aboutRightController.offset < rightMax) {
-                  scrollRight(_aboutRightController.offset + dy);
-                  scrollMain(aboutStart);
-                  return;
-                }
-                scrollRight(rightMax);
-                scrollMain(current + dy);
-                return;
-              }
-              scrollMain(current + dy);
-              return;
-            } else {
-              final newMain = current + dy;
-              if (current > aboutEnd && newMain <= aboutEnd) {
-                scrollMain(aboutEnd);
-                if (rightReady) {
-                  scrollRight(_aboutRightController.offset + dy);
-                }
-                return;
-              }
-              if (current >= aboutStart && current <= aboutEnd) {
-                if (rightReady && _aboutRightController.offset > 0) {
-                  scrollRight(_aboutRightController.offset + dy);
-                  scrollMain(aboutEnd);
-                  return;
-                }
-                scrollRight(0);
-                scrollMain(current + dy);
-                return;
-              }
-              scrollMain(current + dy);
-              return;
-            }
-          }
-        },
-        child: SingleChildScrollView(
-          controller: _mainController,
-          child: Column(
-            children: [
-              SizedBox(height: vh, child: HomePage()),
-              SizedBox(height: vh, child: About()),
-              SizedBox(height: vh, child: Contact()),
-            ],
+      body: CustomScrollView(
+        controller: _mainScrollController,
+        slivers: [
+          SliverToBoxAdapter(
+            child: SizedBox(height: context.screenHeight, child: HomePage()),
           ),
-        ),
+          SliverToBoxAdapter(
+            child: VisibilityDetector(
+              key: Key('about-section'),
+              onVisibilityChanged: (info) {
+                print('ccccc ${info.visibleFraction}');
+                if (info.visibleFraction >= 0.95) {
+                  if (!isAboutSectionVisible) {
+                    setState(() {
+                      isAboutSectionVisible = true;
+                    });
+                  }
+                } else {
+                  if (isAboutSectionVisible) {
+                    setState(() {
+                      isAboutSectionVisible = false;
+                    });
+                  }
+                }
+              },
+              child: SizedBox(
+                height: context.screenHeight,
+                child: About(aboutrighcontroller: _aboutScrollController),
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: SizedBox(height: context.screenHeight, child: Contact()),
+          ),
+        ],
       ),
     );
   }

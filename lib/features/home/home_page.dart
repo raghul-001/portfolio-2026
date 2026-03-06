@@ -133,7 +133,7 @@ class _HomePageState extends State<HomePage> {
                           SecondaryButton(
                             text: 'Download Resume',
                             onPressed: () {},
-                          ),  
+                          ),
                         ],
                       ),
                     ],
